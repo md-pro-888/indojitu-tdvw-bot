@@ -5,9 +5,9 @@ import os
 app = Flask(__name__)
 
 # Ganti ini dengan Token Bot kamu
-TOKEN = 7670500235:AAE2HWbPoT1HyUefAvP4JEbBYFjsWxXgX7Y
+TOKEN = "7670500235:AAE2HWbPoT1HyUefAvP4JEbBYFjsWxXgX7Y"
 # Ganti ini dengan Chat ID grup kamu
-CHAT_ID = -1002595552449
+CHAT_ID = "-1002595552449"
 
 def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
