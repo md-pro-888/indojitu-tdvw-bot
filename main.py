@@ -1,14 +1,10 @@
 from flask import Flask, request
 import requests
 import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 app = Flask(__name__)
 
-# Load from .env or Render environment
+# Ambil Token dan Chat ID dari environment variables
 TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
@@ -19,20 +15,31 @@ def send_telegram_message(text):
         "text": text,
         "parse_mode": "Markdown"
     }
-    requests.post(url, json=payload)
+    response = requests.post(url, json=payload)
+    return response
 
 @app.route('/', methods=['POST'])
 def webhook():
-    data = request.json
-    # Format pesan dari TradingView (dengan asumsi struktur JSON-nya)
-    pair = data.get("pair", "UNKNOWN")
+    data = request.get_json()
+    if not data:
+        return "Invalid request: no JSON", 400
+
+    # Ambil data dari TradingView webhook
+    pair = data.get("pair", "Unknown")
     price = data.get("price", "N/A")
-    signal = data.get("signal", "N/A")
+    signal = data.get("signal", "N/A").upper()
     time = data.get("time", "N/A")
 
-    msg = f"📊 *{pair}*\n💥 *Signal:* {signal}\n💰 *Price:* {price}\n⏰ *Time:* {time}"
-    send_telegram_message(msg)
-    return 'ok', 200
+    # Format pesan ke Telegram
+    message = f"""
+📢 *Trading Signal Received!*
+Pair: *{pair}*
+Price: *{price}*
+Signal: *{signal}*
+Time: `{time}`
+"""
+    send_telegram_message(message)
+    return "ok", 200
 
 @app.route('/', methods=['GET'])
 def home():
