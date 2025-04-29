@@ -1,13 +1,16 @@
 from flask import Flask, request
 import requests
 import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 
-# Ganti ini dengan Token Bot kamu
-TOKEN = "7670500235:AAE2HWbPoT1HyUefAvP4JEbBYFjsWxXgX7Y"
-# Ganti ini dengan Chat ID grup kamu
-CHAT_ID = "-1002595552449"
+# Load from .env or Render environment
+TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -21,8 +24,14 @@ def send_telegram_message(text):
 @app.route('/', methods=['POST'])
 def webhook():
     data = request.json
-    message = data.get('message', '⚡️ Ada alert baru dari TradingView!')
-    send_telegram_message(f"🚀 TradingView Alert: \n{message}")
+    # Format pesan dari TradingView (dengan asumsi struktur JSON-nya)
+    pair = data.get("pair", "UNKNOWN")
+    price = data.get("price", "N/A")
+    signal = data.get("signal", "N/A")
+    time = data.get("time", "N/A")
+
+    msg = f"📊 *{pair}*\n💥 *Signal:* {signal}\n💰 *Price:* {price}\n⏰ *Time:* {time}"
+    send_telegram_message(msg)
     return 'ok', 200
 
 @app.route('/', methods=['GET'])
